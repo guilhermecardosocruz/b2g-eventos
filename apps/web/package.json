@@ -1,25 +1,30 @@
 {
-"name": "web",
-"version": "0.1.0",
-"private": true,
-"scripts": {
-"dev": "next dev --turbo",
-"build": "next build",
-"start": "next start",
-"lint": "next lint"
-},
-"dependencies": {
-"@ducanh2912/next-pwa": "^10.2.9",
-"next": "15.0.0",
-"react": "19.0.0",
-"react-dom": "19.0.0"
-},
-"devDependencies": {
-"@types/node": "^22.7.4",
-"@types/react": "^19.0.0",
-"autoprefixer": "^10.4.20",
-"postcss": "^8.4.47",
-"tailwindcss": "^3.4.10",
-"typescript": "^5.6.3"
-}
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@events/core": "workspace:*",
+    "@events/db": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "next": "15.0.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.7.4",
+    "@types/react": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.6.3"
+  }
 }
