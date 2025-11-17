@@ -1,25 +1,27 @@
 {
-"extends": "../../tsconfig.base.json",
-"compilerOptions": {
-"jsx": "preserve",
-"plugins": [
-{
-"name": "next"
-}
-],
-"paths": {
-"@db/": ["../../packages/db/src/"],
-"@core/": ["../../packages/core/src/"],
-"@ui/": ["../../packages/ui/src/"]
-}
-},
-"include": [
-"next-env.d.ts",
-".next/types//*.ts",
-"/.ts",
-"**/.tsx"
-],
-"exclude": [
-"node_modules"
-]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"],
+      "@db/*": ["../../packages/db/src/*"],
+      "@core/*": ["../../packages/core/src/*"],
+      "@ui/*": ["../../packages/ui/src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
