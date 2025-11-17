@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  PurchaseTicket
-} from "@events/core";
-import {
-  PrismaUserRepository
-} from "@/lib/repositories/prisma-user-repository";
-import {
-  PrismaEventRepository
-} from "@/lib/repositories/prisma-event-repository";
-import {
-  PrismaEventTicketRepository
-} from "@/lib/repositories/prisma-ticket-repository";
-import {
-  PrismaTransactionRepository
-} from "@/lib/repositories/prisma-transaction-repository";
 import { AuthService } from "@/lib/auth/auth-service";
 import { purchaseTicketSchema } from "@/lib/validation/schemas";
+import {
+  PaymentsService
+} from "@/lib/integrations/payments-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,38 +30,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userRepo = new PrismaUserRepository();
-    const eventRepo = new PrismaEventRepository();
-    const ticketRepo = new PrismaEventTicketRepository();
-    const transactionRepo = new PrismaTransactionRepository();
+    const provider =
+      (process.env.PAYMENTS_PROVIDER as "ZOOP" | "PAYPAL" | undefined) ?? "ZOOP";
 
-    const usecase = new PurchaseTicket(
-      userRepo,
-      eventRepo,
-      ticketRepo,
-      transactionRepo
-    );
+    const service = new PaymentsService();
 
-    const { transaction } = await usecase.execute({
+    const { transaction, providerPayload } = await service.startCheckout({
       userId: currentUser.id,
       eventId: parsed.data.eventId,
       ticketId: parsed.data.ticketId,
       quantity: parsed.data.quantity,
-      method: parsed.data.method
+      method: parsed.data.method,
+      provider,
+      // Buyer poderia vir do body; aqui, simplificamos.
+      buyer: {
+        name: currentUser.name,
+        email: currentUser.email.value
+      }
     });
 
     return NextResponse.json(
       {
-        id: transaction.id,
-        userId: transaction.userId,
-        eventId: transaction.eventId,
-        ticketId: transaction.ticketId,
-        amount: transaction.amount.amount,
-        currency: transaction.amount.currency,
-        status: transaction.status,
-        method: transaction.method,
-        createdAt: transaction.createdAt,
-        updatedAt: transaction.updatedAt
+        transaction: {
+          id: transaction.id,
+          userId: transaction.userId,
+          eventId: transaction.eventId,
+          ticketId: transaction.ticketId,
+          amount: transaction.amount.amount,
+          currency: transaction.amount.currency,
+          status: transaction.status,
+          method: transaction.method,
+          createdAt: transaction.createdAt,
+          updatedAt: transaction.updatedAt
+        },
+        provider: providerPayload
       },
       { status: 201 }
     );
