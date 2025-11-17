@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  ORGANIZER
+  ATTENDEE
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  OTHER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  type         UserType      @default(ATTENDEE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  organizedEvents Event[]    @relation("OrganizerEvents")
+  transactions    Transaction[]
+}
+
+model Event {
+  id          String          @id @default(cuid())
+  organizerId String
+  organizer   User            @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  title       String
+  description String?
+  slug        String          @unique
+  startDate   DateTime
+  endDate     DateTime?
+  location    String?
+  capacity    Int?
+  published   Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  tickets      EventTicket[]
+  transactions Transaction[]
+  invitations  Invitation[]
+}
+
+model EventTicket {
+  id            String        @id @default(cuid())
+  eventId       String
+  event         Event         @relation(fields: [eventId], references: [id])
+  name          String
+  description   String?
+  price         Decimal       @db.Decimal(10, 2)
+  quantityTotal Int
+  quantitySold  Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id        String            @id @default(cuid())
+  userId    String?
+  user      User?             @relation(fields: [userId], references: [id])
+  eventId   String
+  event     Event             @relation(fields: [eventId], references: [id])
+  ticketId  String
+  ticket    EventTicket       @relation(fields: [ticketId], references: [id])
+  amount    Decimal           @db.Decimal(10, 2)
+  status    TransactionStatus @default(PENDING)
+  method    PaymentMethod
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  eventId     String
+  event       Event            @relation(fields: [eventId], references: [id])
+  email       String
+  token       String           @unique
+  status      InvitationStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+}
